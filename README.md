@@ -8,6 +8,12 @@
 
 <h3 align="center">📡 <a href="https://amosroger91.github.io/PeerDrop/">amosroger91.github.io/PeerDrop</a></h3>
 
+<p align="center">
+  <a href="https://buymeacoffee.com/amosroger91">
+    <img src="https://img.shields.io/badge/%E2%98%95%20Buy%20me%20a%20coffee-Free%20forever-FFDD00?style=for-the-badge&labelColor=222222" alt="Buy me a coffee" height="40" />
+  </a>
+</p>
+
 **Beam a file straight to a friend — peer-to-peer, anonymous, no servers.**
 Drop a file, get a short code, your friend enters it, and the file streams
 **directly between your two browsers** over WebRTC. Nothing is uploaded, stored,
@@ -77,6 +83,13 @@ css/styles.css        # styling
 js/app.js             # the whole P2P transfer engine (sender + receiver)
 vendor/peerjs.min.js  # PeerJS (vendored, UMD → window.Peer)
 ```
+
+## Support
+
+PeerDrop is **free and always will be** — it's pure peer-to-peer, so there's no
+server to pay for and nothing to charge for. If it saved you the hassle of email
+attachments or an upload site, you can
+[**buy me a coffee** ☕](https://buymeacoffee.com/amosroger91). 💛
 
 ## Credits
 

@@ -129,6 +129,8 @@ body {
 .foot a { color: var(--accent-2); text-decoration: none; }
 .foot a:hover { text-decoration: underline; }
 .foot-sep { margin: 0 8px; opacity: 0.5; }
+.foot-coffee { color: var(--warn) !important; font-weight: 600; }
+.foot-note { margin-top: 9px; opacity: 0.8; font-size: 11.5px; }
 
 @media (max-width: 480px) {
   .code-display { font-size: 38px; letter-spacing: 7px; }
