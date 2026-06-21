@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PeerDrop — beam a file to a friend</title>
+  <meta name="description" content="Share a file with a friend, peer-to-peer. Generate a code, they enter it, the file beams directly between your browsers — no servers, no sign-up, nothing stored." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>" />
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><span></span><span></span></div>
+
+  <main class="app">
+    <header class="head">
+      <div class="logo">📡</div>
+      <h1>PeerDrop</h1>
+      <p class="tag">Beam a file straight to a friend. No servers, no sign-up — your file never leaves the two of you.</p>
+    </header>
+
+    <!-- ========== LANDING ========== -->
+    <section class="card" id="landing">
+      <label class="drop" id="dropzone">
+        <input type="file" id="fileInput" multiple hidden />
+        <div class="drop__icon">📂</div>
+        <div class="drop__main">Drop files here to send</div>
+        <div class="drop__sub">or click to choose · they stay on your device until a friend connects</div>
+      </label>
+
+      <div class="or"><span>or receive</span></div>
+
+      <form class="recv" id="recvForm">
+        <input id="codeInput" class="code-in" type="text" inputmode="latin" autocomplete="off" maxlength="6" placeholder="ENTER CODE" aria-label="Enter a transfer code" />
+        <button class="btn btn-primary" type="submit">Receive</button>
+      </form>
+    </section>
+
+    <!-- ========== SENDING ========== -->
+    <section class="card hidden" id="sendPanel">
+      <button class="back" id="sendBack" type="button">← Cancel</button>
+      <div class="send-head">
+        <div class="send-files" id="sendFiles"></div>
+      </div>
+
+      <div class="code-box">
+        <div class="code-box__lbl">Share this code with your friend</div>
+        <div class="code-display" id="codeDisplay">·····</div>
+        <div class="code-actions">
+          <button class="btn btn-ghost" id="copyCodeBtn" type="button">📋 Copy code</button>
+          <button class="btn btn-ghost" id="copyLinkBtn" type="button">🔗 Copy link</button>
+        </div>
+      </div>
+
+      <div class="status" id="sendStatus">
+        <span class="dot dot--wait" id="sendDot"></span>
+        <span id="sendStatusText">Waiting for your friend to connect…</span>
+      </div>
+
+      <div class="progress hidden" id="sendProgress">
+        <div class="progress__top"><span id="sendProgName">—</span><span id="sendProgPct">0%</span></div>
+        <div class="bar"><div class="bar__fill" id="sendBarFill"></div></div>
+        <div class="progress__sub" id="sendProgSub">—</div>
+      </div>
+    </section>
+
+    <!-- ========== RECEIVING ========== -->
+    <section class="card hidden" id="recvPanel">
+      <button class="back" id="recvBack" type="button">← Back</button>
+      <div class="status" id="recvStatus">
+        <span class="dot dot--wait" id="recvDot"></span>
+        <span id="recvStatusText">Connecting…</span>
+      </div>
+
+      <div class="progress hidden" id="recvProgress">
+        <div class="progress__top"><span id="recvProgName">—</span><span id="recvProgPct">0%</span></div>
+        <div class="bar"><div class="bar__fill" id="recvBarFill"></div></div>
+        <div class="progress__sub" id="recvProgSub">—</div>
+      </div>
+
+      <div class="downloads" id="downloads"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>100% peer-to-peer over WebRTC · nothing is uploaded to a server</span>
+    <span class="foot-sep">·</span>
+    <a id="repoLink" href="#" target="_blank" rel="noopener">source</a>
+  </footer>
+
+  <script src="./vendor/peerjs.min.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
