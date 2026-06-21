@@ -2,9 +2,11 @@
 
 <p align="center">
   <a href="https://amosroger91.github.io/PeerDrop/">
-    <img src="https://img.shields.io/badge/%E2%96%B6%20%20OPEN%20PEERDROP-Beam%20a%20file-5b8cff?style=for-the-badge&labelColor=1f2b52&color=5b8cff" alt="Open PeerDrop" height="62" />
+    <img src="https://img.shields.io/badge/%E2%96%B6%20%20OPEN%20PEERDROP-Beam%20a%20file-5b8cff?style=for-the-badge&labelColor=1f2b52&color=5b8cff" alt="Open PeerDrop" height="72" />
   </a>
 </p>
+
+<h3 align="center">📡 <a href="https://amosroger91.github.io/PeerDrop/">amosroger91.github.io/PeerDrop</a></h3>
 
 **Beam a file straight to a friend — peer-to-peer, anonymous, no servers.**
 Drop a file, get a short code, your friend enters it, and the file streams
