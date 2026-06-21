@@ -96,6 +96,16 @@ body {
 .code-display { font-family: var(--mono); font-size: 48px; font-weight: 700; letter-spacing: 10px; margin: 8px 0 14px; color: #dfe8ff;
   text-shadow: 0 0 24px rgba(91,140,255,0.5); padding-left: 10px; }
 .code-actions { display: flex; gap: 8px; justify-content: center; }
+.qr-wrap { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.qr-wrap.hidden { display: none; }
+.qr { width: 148px; height: 148px; border-radius: 10px; background: #fff; padding: 8px; image-rendering: pixelated; }
+.qr-cap { margin-top: 8px; font-size: 11.5px; color: var(--muted); }
+
+/* accept gate */
+.gate { padding: 16px; border-radius: 14px; background: rgba(56,224,201,0.09); border: 1px solid rgba(56,224,201,0.34); margin-bottom: 4px; text-align: center; animation: pop 0.25s ease; }
+.gate.hidden { display: none; }
+.gate__txt { font-size: 14.5px; font-weight: 600; margin-bottom: 12px; line-height: 1.45; }
+.gate__btns { display: flex; gap: 8px; justify-content: center; }
 
 /* status */
 .status { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 500; padding: 6px 0; }

@@ -52,6 +52,19 @@
           <button class="btn btn-ghost" id="copyCodeBtn" type="button">📋 Copy code</button>
           <button class="btn btn-ghost" id="copyLinkBtn" type="button">🔗 Copy link</button>
         </div>
+        <div class="qr-wrap hidden" id="qrWrap">
+          <img id="qr" class="qr" alt="QR code for the share link" />
+          <div class="qr-cap">📱 Scan with a phone camera to open the link</div>
+        </div>
+      </div>
+
+      <!-- accept gate: shown when a receiver connects with the code -->
+      <div class="gate hidden" id="gate">
+        <div class="gate__txt">📥 Someone connected with your code. Send your file<span id="gatePlural"></span> to them?</div>
+        <div class="gate__btns">
+          <button class="btn btn-primary" id="acceptBtn" type="button">✓ Accept &amp; send</button>
+          <button class="btn btn-ghost" id="declineBtn" type="button">Decline</button>
+        </div>
       </div>
 
       <div class="status" id="sendStatus">
@@ -90,10 +103,11 @@
     <a id="repoLink" href="https://github.com/amosroger91/PeerDrop" target="_blank" rel="noopener">★ Star on GitHub ↗</a>
     <span class="foot-sep">·</span>
     <a class="foot-coffee" href="https://buymeacoffee.com/amosroger91" target="_blank" rel="noopener">☕ Buy me a coffee</a>
-    <div class="foot-note">Free forever — no servers to pay for. If it saved you a tab, a coffee is appreciated 💛</div>
+    <div class="foot-note">Free forever. Your file is pure peer-to-peer — only the tiny "find each other" handshake rides free public infrastructure (PeerJS + a TURN relay). If it saved you a tab, a coffee is appreciated 💛</div>
   </footer>
 
   <script src="./vendor/peerjs.min.js"></script>
+  <script src="./vendor/qrcode.min.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

@@ -17,9 +17,23 @@
   var ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no I/O/0/1
   var $ = function (id) { return document.getElementById(id); };
 
+  // STUN for normal NAT traversal + a free public TURN relay for the ~8-10% of
+  // connections behind symmetric NAT / strict firewalls that can't go direct.
+  // TURN only relays DTLS-encrypted packets — it can't see the file, so the
+  // "nobody sees the bytes" guarantee still holds even when the relay is used.
+  var PEER_OPTS = {
+    config: {
+      iceServers: [
+        { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+        { urls: ["turn:openrelay.metered.ca:80", "turn:openrelay.metered.ca:443", "turn:openrelay.metered.ca:443?transport=tcp"], username: "openrelayproject", credential: "openrelayproject" },
+      ],
+    },
+  };
+
   var peer = null;
   var currentCode = "";
   var sendFiles = [];
+  var pendingConn = null;     // a receiver waiting for the sender to accept
 
   /* ---------------- helpers ---------------- */
   function makeCode(n) {
@@ -58,9 +72,10 @@
     sendFiles = Array.prototype.slice.call(files).filter(function (f) { return f && f.size >= 0; });
     if (!sendFiles.length) return;
     renderSendFiles();
+    $("gatePlural").textContent = sendFiles.length > 1 ? "s" : "";
     showPanel("sendPanel");
+    hide($("gate")); hide($("sendProgress"));
     setSendStatus("wait", "Setting up…");
-    hide($("sendProgress"));
     hostWithCode(makeCode(5));
   }
   function renderSendFiles() {
@@ -81,12 +96,22 @@
       box.appendChild(sum);
     }
   }
+  function shareLink() { return location.origin + location.pathname + "#" + currentCode; }
+  function renderQR() {
+    try {
+      var qr = window.qrcode(0, "M");
+      qr.addData(shareLink());
+      qr.make();
+      $("qr").src = qr.createDataURL(5, 2);
+      show($("qrWrap"));
+    } catch (e) { hide($("qrWrap")); }
+  }
   function hostWithCode(code) {
     destroyPeer();
     currentCode = code;
     $("codeDisplay").textContent = code;
-    peer = new Peer(PREFIX + code);
-    peer.on("open", function () { setSendStatus("wait", "Waiting for your friend to connect…"); });
+    peer = new Peer(PREFIX + code, PEER_OPTS);
+    peer.on("open", function () { setSendStatus("wait", "Waiting for your friend to connect…"); renderQR(); });
     peer.on("connection", onReceiverConnect);
     peer.on("error", function (e) {
       var type = e && e.type;
@@ -94,13 +119,33 @@
       else setSendStatus("err", "Network error (" + (type || "?") + "). Refresh to retry.");
     });
   }
+  // Someone connected with the code → ask before sending (kills drive-by
+  // guessing and code collisions: the bytes only flow once you click Accept).
   function onReceiverConnect(conn) {
-    // Each receiver gets their own transfer; we keep the files in memory.
-    setSendStatus("ok", "Friend connected — sending…");
-    show($("sendProgress"));
-    conn.on("open", function () { runTransfer(conn).catch(function () {}); });
+    conn.on("open", function () {
+      if (pendingConn && pendingConn.open) { try { conn.send({ t: "busy" }); conn.close(); } catch (e) {} return; }
+      pendingConn = conn;
+      setSendStatus("wait", "Someone wants to receive — accept to start.");
+      show($("gate"));
+    });
     conn.on("error", function () {});
-    conn.on("close", function () {});
+    conn.on("close", function () {
+      if (pendingConn === conn) { pendingConn = null; hide($("gate")); setSendStatus("wait", "Waiting for your friend to connect…"); }
+    });
+  }
+  function acceptTransfer() {
+    if (!pendingConn) return;
+    var c = pendingConn; pendingConn = null;
+    hide($("gate")); setSendStatus("ok", "Friend accepted — sending…"); show($("sendProgress"));
+    try { c.send({ t: "accepted" }); } catch (e) {}
+    runTransfer(c).catch(function () {});
+  }
+  function declineTransfer() {
+    if (!pendingConn) return;
+    try { pendingConn.send({ t: "declined" }); } catch (e) {}
+    try { pendingConn.close(); } catch (e) {}
+    pendingConn = null; hide($("gate"));
+    setSendStatus("wait", "Declined. Waiting for your friend to connect…");
   }
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
@@ -149,10 +194,13 @@
   }
   function connectReceiver(code) {
     destroyPeer();
-    peer = new Peer();
+    peer = new Peer(PEER_OPTS);
     peer.on("open", function () {
       var conn = peer.connect(PREFIX + code, { reliable: true });
-      conn.on("open", function () { setRecvStatus("wait", "Connected — waiting for the file…"); });
+      conn.on("open", function () {
+        try { conn.send({ t: "hello" }); } catch (e) {}
+        setRecvStatus("wait", "Connected — waiting for the sender to accept…");
+      });
       conn.on("data", onReceiverData);
       conn.on("error", function () {});
       conn.on("close", function () { if (!rx || !rx.done) { /* sender left */ } });
@@ -173,6 +221,9 @@
     if (ArrayBuffer.isView(data)) return handleChunk(data.buffer);
     if (data instanceof Blob) { data.arrayBuffer().then(handleChunk); return; }
     if (!data || !data.t) return;
+    if (data.t === "accepted") { setRecvStatus("wait", "Sender accepted — incoming…"); return; }
+    if (data.t === "declined") { setRecvStatus("err", "The sender declined this transfer."); return; }
+    if (data.t === "busy") { setRecvStatus("err", "The sender is busy with another transfer — try again in a moment."); return; }
     if (data.t === "manifest") {
       rx.manifest = data; rx.total = data.total || 0; rx.receivedTotal = 0; rx.startTs = Date.now();
       setRecvStatus("ok", "Receiving " + data.files.length + " file" + (data.files.length > 1 ? "s" : "") + "…");
@@ -269,9 +320,16 @@
     setTimeout(function () { btn.textContent = label; }, 1400);
   }
 
+  $("acceptBtn").addEventListener("click", acceptTransfer);
+  $("declineBtn").addEventListener("click", declineTransfer);
   $("sendBack").addEventListener("click", reset);
   $("recvBack").addEventListener("click", reset);
-  function reset() { destroyPeer(); sendFiles = []; rx = null; fileInput.value = ""; $("codeInput").value = ""; showPanel("landing"); }
+  function reset() {
+    destroyPeer(); sendFiles = []; rx = null; pendingConn = null;
+    fileInput.value = ""; $("codeInput").value = "";
+    hide($("gate")); hide($("qrWrap"));
+    showPanel("landing");
+  }
 
   // Deep link: #CODE or ?code=CODE auto-fills (and connects) the receiver.
   function deepCode() {

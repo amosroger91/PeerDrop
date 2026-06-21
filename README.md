@@ -44,10 +44,12 @@ encrypted by WebRTC (DTLS). The bytes never pass through any server we run.
 ## Features
 
 - **Drag & drop** one or many files (or click to choose).
-- **Short shareable code** + a one-click **share link** (`…/#CODE`) that auto-connects.
+- **Short shareable code** + a one-click **share link** (`…/#CODE`) that auto-connects, and a **QR code** to scan from a phone (phone↔laptop is the killer use case).
+- **Accept gate** — the sender sees *"someone connected, send to them?"* and must click **Accept** before any bytes flow. This makes "anonymous" mean *private against access*, not just private in transit — a random guesser can't silently pull your file, and two senders can't collide.
+- **TURN relay fallback** — a free public TURN server is configured, so the ~8–10% of connections behind symmetric NAT / strict firewalls still connect (TURN only forwards DTLS-encrypted packets — it never sees the file).
 - **Live progress** with transfer speed and ETA on both sides.
 - **Auto-save** on receive, with a Save button fallback.
-- **Anonymous** — no logins, no analytics, no file ever leaves the peer connection.
+- **Anonymous** — no logins, no analytics; the file never leaves the direct peer connection.
 
 ## Run locally
 
@@ -68,12 +70,17 @@ Live at `https://amosroger91.github.io/PeerDrop/`.
 
 ## Notes & limits
 
-- The receiver assembles the file **in memory** before saving, so very large files
-  are bounded by available RAM (comfortable for typical files; multi-GB transfers
-  would want a streaming-to-disk approach like StreamSaver).
-- The PeerJS public broker is best-effort; if it's down/rate-limited, the handshake
-  can fail. For heavy use you'd self-host a PeerServer.
-- Some strict/symmetric NATs block direct WebRTC; a TURN relay fixes those stragglers.
+- The receiver currently assembles the file **in memory** before saving, so very
+  large files are bounded by available RAM. **Streaming straight to disk** (File
+  System Access API → StreamSaver → in-memory) is the planned next step to enable
+  multi-GB transfers.
+- **"Free" has an asterisk:** the *file* is pure P2P and touches no server, but the
+  signaling broker (PeerJS) and the TURN relay *are* servers — just free/cheap
+  public ones we ride. At real traffic you'd self-host a PeerServer and a TURN
+  (e.g. Cloudflare at ~$0.05/GB), at which point there's a bill.
+- The access code maps to a public peer id, so the **accept gate** (not the code
+  alone) is what protects the file from someone who connects with a guessed code.
+  For genuinely sensitive files, use a longer code / out-of-band passphrase.
 
 ## Project layout
 
@@ -86,10 +93,12 @@ vendor/peerjs.min.js  # PeerJS (vendored, UMD → window.Peer)
 
 ## Support
 
-PeerDrop is **free and always will be** — it's pure peer-to-peer, so there's no
-server to pay for and nothing to charge for. If it saved you the hassle of email
-attachments or an upload site, you can
-[**buy me a coffee** ☕](https://buymeacoffee.com/amosroger91). 💛
+PeerDrop is **free and always will be** — your file is pure peer-to-peer and never
+touches a server, and it rides only free/cheap public infrastructure for the
+handshake, so there's nothing to charge you for. If it saved you the hassle of
+email attachments or an upload site, you can
+[**buy me a coffee** ☕](https://buymeacoffee.com/amosroger91) to help cover the
+free infra (and the next big feature). 💛
 
 ## Credits
 
